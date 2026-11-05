@@ -1,0 +1,18 @@
+<template><view class="notices"><view class="card"><view class="toolbar"><text class="heading">{{unread?unread+' 条未读':'全部已读'}}</text><button class="ui-button text-button" :disabled="busy||!unread" @click="readAll">全部已读</button></view><template v-if="false"><view v-for="(label,key) in names" :key="key" class="row"><text>{{label}}</text><switch :checked="preferences[key]" @change="preferences[key]=$event.detail.value"/></view><button class="ui-button" :disabled="busy" @click="save">保存接收设置</button><text class="hint">这里控制站内消息，不发送短信或微信订阅通知。</text></template></view><view v-if="error" class="card">{{error}}</view><view v-for="r in rows" :key="r.id" class="card" @click="open(r)"><text class="heading">{{r.read_at?'':'● '}}{{r.title}}</text><view>{{r.body}}</view><text class="hint">{{formatDate(r.created_at)}} · 点击查看</text></view><button class="ui-button" v-if="hasMore" :disabled="busy" @click="load(false)">更早的消息</button><text v-if="!rows.length" class="hint">暂无站内消息。</text></view></template>
+<script>
+import {refreshOnTick} from '../services/panel-refresh'
+import {formatDate} from '../services/display'
+import {request,notify,go} from '../services/shop.js'
+export default {
+ mixins:[refreshOnTick(panel=>panel.load(true))],data(){return{rows:[],unread:0,preferences:{},settingsOpen:false,busy:false,page:1,hasMore:false,error:'',names:{order:'订单进度',approval:'资格审核',finance:'财务与票据',service:'客服回复',marketing:'优惠活动'}}},mounted(){this.load(true)},
+ methods:{formatDate,
+  async load(reset){if(this.busy)return;this.busy=true;try{const page=reset?1:this.page,r=await request('/notices?page='+page);this.rows=reset?r.rows:[...this.rows,...r.rows];this.unread=r.unread;if(!this.settingsOpen)this.preferences=r.preferences;this.page=page+1;this.hasMore=r.rows.length===30;this.error=''}catch(e){this.error=e.message}finally{this.busy=false}},
+  async open(r){if(this.busy)return;this.busy=true;try{if(!r.read_at){await request('/notices/'+r.id+'/read','POST',{});if(!r.read_at){r.read_at=new Date().toISOString();this.unread=Math.max(0,this.unread-1)}}if(r.target_screen)go(r.target_screen,r.target_id?{id:r.target_id}:{})}catch(e){notify(e)}finally{this.busy=false}},
+  async readAll(){if(this.busy)return;this.busy=true;let success=false;try{await request('/notices/read-all','POST',{});const now=new Date().toISOString();for(const row of this.rows)if(!row.read_at)row.read_at=now;this.unread=0;success=true}catch(e){notify(e)}finally{this.busy=false}if(success)await this.load(true)},
+  async save(){if(this.busy)return;this.busy=true;try{await request('/notices/preferences','POST',this.preferences);uni.showToast({title:'已保存',icon:'success'})}catch(e){notify(e)}finally{this.busy=false}}
+ }
+}
+</script>
+<style scoped>
+@import '../styles/component-base.css';
+.notices{padding:16px;font-size:16px}.card{padding:16px;background:var(--shop-surface, #fdfeff);border-radius:12px;margin-bottom:14px;line-height:1.8;overflow-wrap:anywhere}.heading{display:block;font-size:18px;font-weight:bold}.hint{color:var(--shop-ink, #28546c);font-size:13px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0}.row button{flex:1}button{font-size:15px;background:var(--shop-accent, #c7e8f5);color:var(--shop-ink, #28546c);margin-top:10px}.notices{padding:12px;font-size:14px}.heading{font-size:16px}.toolbar{display:flex;align-items:center;gap:12px}.toolbar .heading{margin-right:auto;font-size:14px}.toolbar .text-button{background:transparent;color:var(--shop-ink, #28546c);font-size:12px;line-height:32px;padding:0;margin:0}.hint{display:block;margin-top:8px;font-size:12px}.card{padding:14px;border:1px solid var(--shop-border, #d5e6ee);margin-bottom:10px}.row switch{transform:scale(.85);transform-origin:right center}</style>

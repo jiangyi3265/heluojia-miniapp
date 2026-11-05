@@ -1,0 +1,17 @@
+/* Compiled into each component so the same rules apply on WeChat and H5. */
+view,input,textarea,button,picker,scroll-view{box-sizing:border-box}
+button{min-width:0;max-width:100%;font-family:inherit;line-height:1.5;word-break:normal;overflow-wrap:anywhere;border-radius:8px}
+button::after{box-sizing:border-box;border-radius:inherit}
+.ui-button{display:flex;align-items:center;justify-content:center;min-height:44px;padding:10px 12px;line-height:1.5;text-align:center}
+input,textarea{font-family:inherit;min-width:0;max-width:100%;font-size:15px}
+input{height:46px;min-height:46px;line-height:46px}
+textarea{line-height:1.7}
+image{flex-shrink:0;max-width:100%}
+.card,.white-card,.panel,.form{min-width:0;box-sizing:border-box}
+.card,.white-card{overflow-wrap:anywhere}
+.heading,.title,.product-title{line-height:1.5}
+.hint,.small,.muted{line-height:1.7}
+.row,.between,.line{min-width:0}
+.row>view,.between>view{min-width:0}
+.row>button,.between>button{min-width:0;flex-shrink:1}
+.input{min-width:0;max-width:100%;line-height:1.7;box-sizing:border-box}

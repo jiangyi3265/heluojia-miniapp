@@ -1,0 +1,10 @@
+<template><view class="points-panel"><view v-if="error" class="card">{{error}}<button class="ui-button" @click="load">重试</button></view><view class="balance"><text>可用积分</text><view class="amount">{{account.available||0}}</view><text v-if="account.debt">退款待抵扣 {{account.debt}} 分，后续积分先抵扣。</text></view><view class="card"><view>零售订单按商品实付金额（不含运费）每满1元，得{{account.rules?.earnPerYuan||0}}积分；充值和专属拿货订单不送积分。</view><view>{{account.rules?.pointsPerYuan||100}}积分抵1元，最多抵商品金额{{account.rules?.maxPercent||0}}%。</view><view>收货满{{account.rules?.settlementDays||15}}天且无相关售后后发放，入账后{{account.rules?.expiryDays||365}}天有效；订单退款会扣回相应积分。</view></view><view class="heading">积分明细</view><view v-if="!account.ledger?.length" class="card">还没有积分记录。</view><view v-for="(r,i) in account.ledger" :key="i" class="card"><view class="between"><text>{{names[r.kind]||'积分变动'}}</text><text>{{r.delta>0?'+':''}}{{r.delta}}分</text></view><view>{{r.note}}</view><view class="small">{{formatDate(r.created_at)}}</view></view></view></template>
+<script>
+import {refreshOnTick} from '../services/panel-refresh'
+import {request} from '../services/shop.js'
+import {formatDate} from '../services/display.js'
+export default {mixins:[refreshOnTick()],data(){return {account:{rules:{},ledger:[]},error:'',names:{earn:'消费获得',hold:'订单使用',return:'退回积分',expire:'积分到期',revoke:'退款撤回'}}},mounted(){this.load()},methods:{formatDate,async load(){try{this.account=await request('/points');this.error=''}catch(e){this.error=e.message}}}}
+</script>
+<style scoped>
+@import '../styles/component-base.css';
+.points-panel{padding:16px;font-size:16px}.balance{padding:24px;background:var(--shop-accent, #c7e8f5);color:var(--shop-ink, #28546c);border-radius:14px;line-height:1.8}.amount{font-size:34px}.card{padding:16px;background:var(--shop-surface, #fdfeff);border-radius:12px;margin-top:12px;line-height:1.8}.heading{font-size:20px;margin-top:20px;font-weight:bold}.between{display:flex;justify-content:space-between;gap:12px}.small{font-size:14px;color:var(--shop-muted, #59727f)}</style>

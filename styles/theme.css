@@ -1,0 +1,15 @@
+/* Shared light-blue palette. Hex fallbacks keep older WeChat views compatible. */
+page {
+ --shop-ink:#28546c;
+ --shop-text:#2b424f;
+ --shop-muted:#59727f;
+ --shop-accent:#c7e8f5;
+ --shop-soft:#eaf5fb;
+ --shop-background:#f3f8fb;
+ --shop-surface:#fdfeff;
+ --shop-border:#d5e6ee;
+ --shop-control:#417c9a;
+ --shop-disabled:#dfebf1;
+ background:var(--shop-background, #f3f8fb);
+ color:var(--shop-text, #2b424f);
+}
